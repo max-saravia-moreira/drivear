@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  sqledge:
+    # Imagen oficial de Azure SQL Edge, compatible con ARM64 (M1/M2/M3)
+    image: mcr.microsoft.com/azure-sql-edge
+    container_name: mssql_server_arm64
+    restart: always
+    ports:
+      # Mapea el puerto 1433 del contenedor al puerto 1433 de tu Mac
+      - "1433:1433"
+    environment:
+      # Aceptación de la EULA (Obligatorio)
+      ACCEPT_EULA: "Y"
+      # Contraseña de administrador 'sa'. Debe ser fuerte.
+      MSSQL_SA_PASSWORD: "TuContraseñaFuerte123!"
+      # Configura la edición (Developer es la más común)
+      MSSQL_PID: "Developer"
+    volumes:
+      # (Opcional) Persistencia de datos: Mapea una carpeta local a la carpeta de datos de MSSQL
+      # Esto asegura que tus datos no se pierdan al detener o eliminar el contenedor
+      - ./data:/var/opt/mssql
