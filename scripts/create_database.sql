@@ -1,4 +1,4 @@
-
+CREATE DATABASE sistema_transporte;
 USE sistema_transporte;
 
 CREATE TABLE usuarios (
@@ -13,7 +13,7 @@ CREATE TABLE usuarios (
   codigo_postal INT,
   tipo_usuario VARCHAR(50) CHECK (tipo_usuario IN ('chofer', 'pasajero')),
   estado VARCHAR(50) CHECK (estado IN ('activo', 'inactivo', 'suspendido')),
-  contraseña VARCHAR(255) NOT NULL,
+  contrasena VARCHAR(255) NOT NULL,
 
   creado_por INT NULL,
   creado_fecha DATETIME DEFAULT GETDATE(),
