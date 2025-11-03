@@ -14,7 +14,6 @@ CREATE TABLE usuarios (
   tipo_usuario VARCHAR(50) CHECK (tipo_usuario IN ('chofer', 'pasajero')),
   estado VARCHAR(50) CHECK (estado IN ('activo', 'inactivo', 'suspendido')),
   contrasena VARCHAR(255) NOT NULL,
-
   creado_por INT NULL,
   creado_fecha DATETIME DEFAULT GETDATE(),
   actualizado_por INT NULL,
@@ -34,7 +33,6 @@ CREATE TABLE licencias (
   fecha_emision DATE NOT NULL,
   fecha_vencimiento DATE NOT NULL,
   usuario_id INT NOT NULL,
-
   creado_por INT,
   creado_fecha DATETIME DEFAULT GETDATE(),
   actualizado_por INT,
@@ -55,7 +53,6 @@ CREATE TABLE vehiculos (
   patente VARCHAR(20) NOT NULL,
   anio INT NOT NULL,
   usuario_id INT NOT NULL,
-
   creado_por INT,
   creado_fecha DATETIME DEFAULT GETDATE(),
   actualizado_por INT,
@@ -75,7 +72,6 @@ CREATE TABLE seguros (
   fecha_vencimiento DATE NOT NULL,
   cobertura_detalle VARCHAR(255),
   vehiculo_id INT NOT NULL,
-
   creado_por INT,
   creado_fecha DATETIME DEFAULT GETDATE(),
   actualizado_por INT,
