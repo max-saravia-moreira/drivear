@@ -127,64 +127,124 @@ BEGIN TRY
        7) Viajes: referencian veh�culos (vehiculo_id por patente)
        -------------------------------------------------------- */
 
-    INSERT INTO viajes
-    (fecha,origen,destino,hora_inicial,distancia_km,costo,estado,vehiculo_id)
-    VALUES
-    (CAST(GETDATE() AS DATE),'Buenos Aires','La Plata','08:00',60.5,5000,'finalizado',(SELECT vehiculo_id FROM vehiculos WHERE patente='AA001AA')),
-    (DATEADD(DAY,-1,GETDATE()),'Quilmes','Avellaneda','09:00',20.0,1800,'finalizado',(SELECT vehiculo_id FROM vehiculos WHERE patente='AB002AB')),
-    (DATEADD(DAY,-2,GETDATE()),'Lanus','Banfield','10:30',15.2,1500,'finalizado',(SELECT vehiculo_id FROM vehiculos WHERE patente='AC003AC')),
-    (DATEADD(DAY,-3,GETDATE()),'Morón','Haedo','07:45',8.3,950,'pendiente',(SELECT vehiculo_id FROM vehiculos WHERE patente='AD004AD')),
-    (DATEADD(DAY,-4,GETDATE()),'Lomas','Adrogué','12:00',12.0,1200,'en curso',(SELECT vehiculo_id FROM vehiculos WHERE patente='AE005AE')),
-    (DATEADD(DAY,-5,GETDATE()),'San Justo','Ciudadela','13:30',10.1,1100,'pendiente',(SELECT vehiculo_id FROM vehiculos WHERE patente='AF006AF')),
-    (DATEADD(DAY,-6,GETDATE()),'La Plata','Berisso','14:00',9.0,900,'finalizado',(SELECT vehiculo_id FROM vehiculos WHERE patente='AG007AG')),
-    (DATEADD(DAY,-7,GETDATE()),'Temperley','Lanus','15:15',7.5,850,'finalizado',(SELECT vehiculo_id FROM vehiculos WHERE patente='AH008AH')),
-    (DATEADD(DAY,-8,GETDATE()),'Moreno','Merlo','16:00',11.0,1000,'pendiente',(SELECT vehiculo_id FROM vehiculos WHERE patente='AI009AI')),
-    (DATEADD(DAY,-9,GETDATE()),'CABA','Tigre','17:30',30.0,3000,'pendiente',(SELECT vehiculo_id FROM vehiculos WHERE patente='AJ010AJ'));
+      INSERT INTO viajes
+      (fecha_inicial, fecha_final, origen, destino, distancia_km, costo, estado, vehiculo_id)
+      VALUES
+      -- Finalizado
+      (SYSDATETIMEOFFSET(), DATEADD(MINUTE, 45, SYSDATETIMEOFFSET()), 'Buenos Aires', 'La Plata', 60.5, 5000, 'finalizado', (SELECT vehiculo_id FROM vehiculos WHERE patente='AA001AA')),
+      -- Finalizado
+      (DATEADD(DAY, -1, SYSDATETIMEOFFSET()), DATEADD(MINUTE, 40, DATEADD(DAY, -1, SYSDATETIMEOFFSET())), 'Quilmes', 'Avellaneda', 20.0, 1800, 'finalizado', (SELECT vehiculo_id FROM vehiculos WHERE patente='AB002AB')),
+      -- Finalizado
+      (DATEADD(DAY, -2, SYSDATETIMEOFFSET()), DATEADD(MINUTE, 35, DATEADD(DAY, -2, SYSDATETIMEOFFSET())), 'Lanús', 'Banfield', 15.2, 1500, 'finalizado', (SELECT vehiculo_id FROM vehiculos WHERE patente='AC003AC')),
+      -- Pendiente → sin fecha_final
+      (DATEADD(DAY, -3, SYSDATETIMEOFFSET()), NULL, 'Morón', 'Haedo', 8.3, 950, 'pendiente', (SELECT vehiculo_id FROM vehiculos WHERE patente='AD004AD')),
+      -- En curso → sin fecha_final
+      (DATEADD(DAY, -4, SYSDATETIMEOFFSET()), NULL, 'Lomas', 'Adrogué', 12.0, 1200, 'en curso', (SELECT vehiculo_id FROM vehiculos WHERE patente='AE005AE')),
+      -- Pendiente → sin fecha_final
+      (DATEADD(DAY, -5, SYSDATETIMEOFFSET()), NULL, 'San Justo', 'Ciudadela', 10.1, 1100, 'pendiente', (SELECT vehiculo_id FROM vehiculos WHERE patente='AF006AF')),
+      -- Finalizado
+      (DATEADD(DAY, -6, SYSDATETIMEOFFSET()), DATEADD(MINUTE, 20, DATEADD(DAY, -6, SYSDATETIMEOFFSET())), 'La Plata', 'Berisso', 9.0, 900, 'finalizado', (SELECT vehiculo_id FROM vehiculos WHERE patente='AG007AG')),
+      -- Finalizado
+      (DATEADD(DAY, -7, SYSDATETIMEOFFSET()), DATEADD(MINUTE, 25, DATEADD(DAY, -7, SYSDATETIMEOFFSET())), 'Temperley', 'Lanús', 7.5, 850, 'finalizado', (SELECT vehiculo_id FROM vehiculos WHERE patente='AH008AH')),
+      -- Pendiente → sin fecha_final
+      (DATEADD(DAY, -8, SYSDATETIMEOFFSET()), NULL, 'Moreno', 'Merlo', 11.0, 1000, 'pendiente', (SELECT vehiculo_id FROM vehiculos WHERE patente='AI009AI')),
+      -- Pendiente → sin fecha_final
+      (DATEADD(DAY, -9, SYSDATETIMEOFFSET()), NULL, 'CABA', 'Tigre', 30.0, 3000, 'pendiente', (SELECT vehiculo_id FROM vehiculos WHERE patente='AJ010AJ'));
 
-    /* --------------------------------------------------------
-       8) Usuarios_Viajes_Tarjetas:
-          - Chofer / Pasajero por email
-          - Viaje por combinaci�n (fecha,origen,destino,hora_inicial)
-          - Tarjeta por n�mero
-       -------------------------------------------------------- */
-    INSERT INTO usuarios_viajes_tarjetas (usuario_chofer_id,usuario_pasajero_id,viaje_id,tarjeta_id)
-    VALUES
-    (6,1,1,1),
-    (7,2,2,2),
-	(8,3,3,3),
-	(4,4,4,4),
-	(10,5,5,5),
-	(6,2,6,7),
-	(7,3,7,3),
-	(6,2,5,5),
-	(9,5,9,10),
-	(10,1,10,6);
+/* --------------------------------------------------------
+   8) Usuarios_Viajes_Tarjetas: CORREGIDO Y VALIDADO
+      - Usa emails para obtener IDs (más mantenible)
+      - Cada tarjeta pertenece al pasajero correcto
+      - Los choferes coinciden con los vehículos de cada viaje
+   -------------------------------------------------------- */
+INSERT INTO usuarios_viajes_tarjetas (usuario_chofer_id, usuario_pasajero_id, viaje_id, tarjeta_id)
+VALUES
+    -- Viaje 1: Carlos (chofer AA001AA) + Ramon (pasajero) + Tarjeta de Ramon
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='carlos@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='ramon@drivear.com'),
+        1,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111111001) -- Tarjeta de Ramon
+    ),
+    -- Viaje 2: Mariana (chofer AB002AB) + Laura (pasajero) + Tarjeta de Laura
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='mariana@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='laura@drivear.com'),
+        2,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=5555555555552002) -- Tarjeta de Laura
+    ),
+    -- Viaje 3: Sergio (chofer AC003AC) + Sofia (pasajero) + Tarjeta de Sofia
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='sergio@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='sofia@drivear.com'),
+        3,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111113003) -- Tarjeta de Sofia
+    ),
+    -- Viaje 4: Andres (chofer AD004AD) + Clara (pasajero) + Tarjeta de Clara
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='andres@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='clara@drivear.com'),
+        4,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=5555555555554004) -- Tarjeta de Clara
+    ),
+    -- Viaje 5: Leonardo (chofer AE005AE) + Paula (pasajero) + Tarjeta de Paula
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='leonardo@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='paula@drivear.com'),
+        5,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111115005) -- Tarjeta de Paula
+    ),
+    -- Viaje 6: Carlos (chofer AF006AF) + Laura (pasajero) + Tarjeta #2 de Laura
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='carlos@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='laura@drivear.com'),
+        6,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111117007) -- Tarjeta credito de Laura
+    ),
+    -- Viaje 7: Mariana (chofer AG007AG) + Sofia (pasajero) + Tarjeta de Sofia
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='mariana@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='sofia@drivear.com'),
+        7,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111113003) -- Tarjeta de Sofia
+    ),
+    -- Viaje 8: Sergio (chofer AH008AH) + Ramon (pasajero) + Tarjeta #2 de Ramon
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='sergio@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='ramon@drivear.com'),
+        8,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=5555555555556006) -- Tarjeta debito de Ramon
+    ),
+    -- Viaje 9: Andres (chofer AI009AI) + Paula (pasajero) + Tarjeta #2 de Paula
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='andres@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='paula@drivear.com'),
+        9,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=5555555555550010) -- Tarjeta debito de Paula
+    ),
+    -- Viaje 10: Leonardo (chofer AJ010AJ) + Ramon (pasajero) + Tarjeta de Ramon
+    (
+        (SELECT usuario_id FROM usuarios WHERE email='leonardo@drivear.com'),
+        (SELECT usuario_id FROM usuarios WHERE email='ramon@drivear.com'),
+        10,
+        (SELECT tarjeta_id FROM tarjetas WHERE numero_tarjeta=4111111111111001) -- Tarjeta credito de Ramon
+    );
 
-    /* --------------------------------------------------------
-       9) Calificaciones: por viaje y creador (pasajero por email)
-       -------------------------------------------------------- */
-    INSERT INTO calificaciones (puntuacion,comentario,viaje_id)
-    VALUES
-    (5,'Excelente servicio',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(GETDATE() AS DATE) AND v.origen='Buenos Aires' AND v.destino='La Plata' AND v.hora_inicial='08:00')),
-    (4,'Buen viaje, puntual',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-1,GETDATE()) AS DATE) AND v.origen='Quilmes' AND v.destino='Avellaneda' AND v.hora_inicial='09:00')),
-    (5,'Muy cómodo y limpio',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-2,GETDATE()) AS DATE) AND v.origen='Lanus' AND v.destino='Banfield' AND v.hora_inicial='10:30')),
-    (3,'Demora en la salida',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-3,GETDATE()) AS DATE) AND v.origen='Morón' AND v.destino='Haedo' AND v.hora_inicial='07:45')),
-    (4,'Correcto, sin inconvenientes',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-4,GETDATE()) AS DATE) AND v.origen='Lomas' AND v.destino='Adrogué' AND v.hora_inicial='12:00')),
-    (5,'Excelente atención',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-5,GETDATE()) AS DATE) AND v.origen='San Justo' AND v.destino='Ciudadela' AND v.hora_inicial='13:30')),
-    (4,'Todo bien',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-6,GETDATE()) AS DATE) AND v.origen='La Plata' AND v.destino='Berisso' AND v.hora_inicial='14:00')),
-    (5,'Muy amable el chofer',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-7,GETDATE()) AS DATE) AND v.origen='Temperley' AND v.destino='Lanus' AND v.hora_inicial='15:15')),
-    (3,'Un poco de tráfico, todo ok',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-8,GETDATE()) AS DATE) AND v.origen='Moreno' AND v.destino='Merlo' AND v.hora_inicial='16:00')),
-    (5,'Rápido y seguro',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-9,GETDATE()) AS DATE) AND v.origen='CABA' AND v.destino='Tigre' AND v.hora_inicial='17:30'));
+   /* --------------------------------------------------------
+      9) Calificaciones: por viaje y creador (pasajero por email)
+      -------------------------------------------------------- */
+      INSERT INTO calificaciones (puntuacion, comentario, viaje_id)
+VALUES
+  (5, 'Excelente servicio', 1),              -- Buenos Aires → La Plata
+  (4, 'Buen viaje, puntual', 2),             -- Quilmes → Avellaneda
+  (5, 'Muy cómodo y limpio', 3),             -- Lanús → Banfield
+  (3, 'Demora en la salida', 4),             -- Morón → Haedo
+  (4, 'Correcto, sin inconvenientes', 5),    -- Lomas → Adrogué
+  (5, 'Excelente atención', 6),              -- San Justo → Ciudadela
+  (4, 'Todo bien', 7),                        -- La Plata → Berisso
+  (5, 'Muy amable el chofer', 8),            -- Temperley → Lanús
+  (3, 'Un poco de tráfico, todo ok', 9),     -- Moreno → Merlo
+  (5, 'Rápido y seguro', 10);                -- CABA → Tigre
 
     COMMIT;
 END TRY
