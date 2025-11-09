@@ -184,6 +184,16 @@ SELECT
   actualizado_fecha
 FROM dbo.usuarios_viajes_tarjetas;
 GO
+
+CREATE VIEW vw_IngresosPorMes AS
+SELECT 
+	FORMAT(fecha, 'yyyy-MM') AS mes,
+	SUM(costo) AS total_ingresos,
+	COUNT(*) AS cantidad_viajes
+FROM viajes
+WHERE estado = 'finalizado'
+GROUP BY FORMAT(fecha, 'yyyy-MM');
+
 /* ====== MOSTRAR VISTAS ====== */
 SELECT TOP (10) * FROM dbo.v_usuarios;
 SELECT TOP (10) * FROM dbo.v_licencias;
@@ -193,3 +203,5 @@ SELECT TOP (10) * FROM dbo.v_tarjetas;
 SELECT TOP (10) * FROM dbo.v_viajes;
 SELECT TOP (10) * FROM dbo.v_calificaciones;
 SELECT TOP (10) * FROM dbo.v_usuarios_viajes_tarjetas;
+
+
