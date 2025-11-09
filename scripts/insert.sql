@@ -163,38 +163,28 @@ BEGIN TRY
     /* --------------------------------------------------------
        9) Calificaciones: por viaje y creador (pasajero por email)
        -------------------------------------------------------- */
-    INSERT INTO calificaciones (puntuacion,comentario,viaje_id,creado_por)
+    INSERT INTO calificaciones (puntuacion,comentario,viaje_id)
     VALUES
     (5,'Excelente servicio',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(GETDATE() AS DATE) AND v.origen='Buenos Aires' AND v.destino='La Plata' AND v.hora_inicial='08:00'),
-        (SELECT usuario_id FROM usuarios WHERE email='ramon@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(GETDATE() AS DATE) AND v.origen='Buenos Aires' AND v.destino='La Plata' AND v.hora_inicial='08:00')),
     (4,'Buen viaje, puntual',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-1,GETDATE()) AS DATE) AND v.origen='Quilmes' AND v.destino='Avellaneda' AND v.hora_inicial='09:00'),
-        (SELECT usuario_id FROM usuarios WHERE email='laura@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-1,GETDATE()) AS DATE) AND v.origen='Quilmes' AND v.destino='Avellaneda' AND v.hora_inicial='09:00')),
     (5,'Muy cómodo y limpio',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-2,GETDATE()) AS DATE) AND v.origen='Lanus' AND v.destino='Banfield' AND v.hora_inicial='10:30'),
-        (SELECT usuario_id FROM usuarios WHERE email='sofia@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-2,GETDATE()) AS DATE) AND v.origen='Lanus' AND v.destino='Banfield' AND v.hora_inicial='10:30')),
     (3,'Demora en la salida',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-3,GETDATE()) AS DATE) AND v.origen='Morón' AND v.destino='Haedo' AND v.hora_inicial='07:45'),
-        (SELECT usuario_id FROM usuarios WHERE email='clara@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-3,GETDATE()) AS DATE) AND v.origen='Morón' AND v.destino='Haedo' AND v.hora_inicial='07:45')),
     (4,'Correcto, sin inconvenientes',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-4,GETDATE()) AS DATE) AND v.origen='Lomas' AND v.destino='Adrogué' AND v.hora_inicial='12:00'),
-        (SELECT usuario_id FROM usuarios WHERE email='paula@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-4,GETDATE()) AS DATE) AND v.origen='Lomas' AND v.destino='Adrogué' AND v.hora_inicial='12:00')),
     (5,'Excelente atención',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-5,GETDATE()) AS DATE) AND v.origen='San Justo' AND v.destino='Ciudadela' AND v.hora_inicial='13:30'),
-        (SELECT usuario_id FROM usuarios WHERE email='laura@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-5,GETDATE()) AS DATE) AND v.origen='San Justo' AND v.destino='Ciudadela' AND v.hora_inicial='13:30')),
     (4,'Todo bien',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-6,GETDATE()) AS DATE) AND v.origen='La Plata' AND v.destino='Berisso' AND v.hora_inicial='14:00'),
-        (SELECT usuario_id FROM usuarios WHERE email='sofia@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-6,GETDATE()) AS DATE) AND v.origen='La Plata' AND v.destino='Berisso' AND v.hora_inicial='14:00')),
     (5,'Muy amable el chofer',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-7,GETDATE()) AS DATE) AND v.origen='Temperley' AND v.destino='Lanus' AND v.hora_inicial='15:15'),
-        (SELECT usuario_id FROM usuarios WHERE email='clara@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-7,GETDATE()) AS DATE) AND v.origen='Temperley' AND v.destino='Lanus' AND v.hora_inicial='15:15')),
     (3,'Un poco de tráfico, todo ok',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-8,GETDATE()) AS DATE) AND v.origen='Moreno' AND v.destino='Merlo' AND v.hora_inicial='16:00'),
-        (SELECT usuario_id FROM usuarios WHERE email='paula@drivear.com')),
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-8,GETDATE()) AS DATE) AND v.origen='Moreno' AND v.destino='Merlo' AND v.hora_inicial='16:00')),
     (5,'Rápido y seguro',
-        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-9,GETDATE()) AS DATE) AND v.origen='CABA' AND v.destino='Tigre' AND v.hora_inicial='17:30'),
-        (SELECT usuario_id FROM usuarios WHERE email='ramon@drivear.com'));
+        (SELECT v.viaje_id FROM viajes v WHERE v.fecha=CAST(DATEADD(DAY,-9,GETDATE()) AS DATE) AND v.origen='CABA' AND v.destino='Tigre' AND v.hora_inicial='17:30'));
 
     COMMIT;
 END TRY
