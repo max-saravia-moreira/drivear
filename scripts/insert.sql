@@ -37,7 +37,7 @@ VALUES
 (20945678901,'Sofia','Gimenez','sofia@drivear.com',1177788899,'Corrientes',654,1700,'pasajero','activo','pass3'),
 (20555222333,'Clara','Diaz','clara@drivear.com',1144466677,'Laprida',159,1640,'pasajero','activo','pass4'),
 (20999911122,'Paula','Herrera','paula@drivear.com',1133300011,'Italia',888,1400,'pasajero','activo','pass5'),
-(27333222119,'Carlos','Gomez','carlos@drivear.com',1167788990,'San Martín',456,1638,'chofer','activo','pass6'),
+(27333222119,'Carlos','Gomez','carlos@drivear.com',1167788990,'San Martï¿½n',456,1638,'chofer','activo','pass6'),
 (27455678909,'Mariana','Lopez','mariana@drivear.com',1142233445,'Lavalle',789,1650,'chofer','activo','pass7'),
 (27999887766,'Sergio','Martinez','sergio@drivear.com',1161122233,'Rivadavia',777,1800,'chofer','activo','pass8'),
 (27888999112,'Andres','Silva','andres@drivear.com',1155566677,'Mitre',222,1900,'chofer','activo','pass9'),
@@ -73,7 +73,7 @@ VALUES
 (700010,'B1','2023-12-01','2027-12-01',@c5);
 
 --------------------------------------------------------------------
--- 3. Vehículos (10)
+-- 3. Vehï¿½culos (10)
 --------------------------------------------------------------------
 INSERT INTO vehiculos
 (marca,modelo,color,patente,anio,usuario_id)
@@ -100,11 +100,11 @@ VALUES
 ('La Caja','Total',900003,DATEADD(MONTH,24,GETDATE()),'Completa',3),
 ('Provincia Seguros','Terceros',900004,DATEADD(MONTH,10,GETDATE()),'RC',4),
 ('San Cristobal','Total',900005,DATEADD(MONTH,30,GETDATE()),'Total+Robo',5),
-('Federacion Patronal','Terceros',900006,DATEADD(MONTH,8,GETDATE()),'Básica',6),
+('Federacion Patronal','Terceros',900006,DATEADD(MONTH,8,GETDATE()),'Bï¿½sica',6),
 ('La Caja','Total',900007,DATEADD(MONTH,20,GETDATE()),'Completa',7),
 ('Sura','Terceros',900008,DATEADD(MONTH,14,GETDATE()),'RC+Robo',8),
 ('Mercantil Andina','Total',900009,DATEADD(MONTH,26,GETDATE()),'Completa',9),
-('Mapfre','Terceros',900010,DATEADD(MONTH,16,GETDATE()),'Básica+Incendio',10);
+('Mapfre','Terceros',900010,DATEADD(MONTH,16,GETDATE()),'Bï¿½sica+Incendio',10);
 
 --------------------------------------------------------------------
 -- 5. Tarjetas (10)
@@ -112,7 +112,7 @@ VALUES
 INSERT INTO tarjetas
 (numero_tarjeta,nombre_titular,tipo_tarjeta,entidad_bancaria,red_pago,cvv,vencimiento,usuario_id)
 VALUES
-(4111111111111001,'Ramon Lucci','credito','Banco Nación','Visa',123,DATEADD(YEAR,2,GETDATE()),@p1),
+(4111111111111001,'Ramon Lucci','credito','Banco Naciï¿½n','Visa',123,DATEADD(YEAR,2,GETDATE()),@p1),
 (5555555555552002,'Laura Perez','debito','Santander','Mastercard',321,DATEADD(YEAR,1,GETDATE()),@p2),
 (4111111111113003,'Sofia Gimenez','credito','Galicia','Visa',654,DATEADD(YEAR,2,GETDATE()),@p3),
 (5555555555554004,'Clara Diaz','debito','BBVA','Mastercard',777,DATEADD(YEAR,3,GETDATE()),@p4),
@@ -120,7 +120,7 @@ VALUES
 (5555555555556006,'Ramon Lucci','debito','Santander','Maestro',999,DATEADD(YEAR,2,GETDATE()),@p1),
 (4111111111117007,'Laura Perez','credito','Galicia','Visa',321,DATEADD(YEAR,3,GETDATE()),@p2),
 (5555555555558008,'Sofia Gimenez','debito','ICBC','Mastercard',888,DATEADD(YEAR,2,GETDATE()),@p3),
-(4111111111119009,'Clara Diaz','credito','Banco Nación','Visa',999,DATEADD(YEAR,3,GETDATE()),@p4),
+(4111111111119009,'Clara Diaz','credito','Banco Naciï¿½n','Visa',999,DATEADD(YEAR,3,GETDATE()),@p4),
 (5555555555550010,'Paula Herrera','debito','BBVA','Maestro',123,DATEADD(YEAR,2,GETDATE()),@p5);
 
 --------------------------------------------------------------------
@@ -132,8 +132,8 @@ VALUES
 (CAST(GETDATE() AS DATE),'Buenos Aires','La Plata','08:00',60.5,5000,'finalizado',1),
 (DATEADD(DAY,-1,GETDATE()),'Quilmes','Avellaneda','09:00',20.0,1800,'finalizado',2),
 (DATEADD(DAY,-2,GETDATE()),'Lanus','Banfield','10:30',15.2,1500,'finalizado',3),
-(DATEADD(DAY,-3,GETDATE()),'Morón','Haedo','07:45',8.3,950,'pendiente',4),
-(DATEADD(DAY,-4,GETDATE()),'Lomas','Adrogué','12:00',12.0,1200,'en curso',5),
+(DATEADD(DAY,-3,GETDATE()),'MorÃ³n','Haedo','07:45',8.3,950,'pendiente',4),
+(DATEADD(DAY,-4,GETDATE()),'Lomas','AdroguÃ©','12:00',12.0,1200,'en curso',5),
 (DATEADD(DAY,-5,GETDATE()),'San Justo','Ciudadela','13:30',10.1,1100,'pendiente',6),
 (DATEADD(DAY,-6,GETDATE()),'La Plata','Berisso','14:00',9.0,900,'finalizado',7),
 (DATEADD(DAY,-7,GETDATE()),'Temperley','Lanus','15:15',7.5,850,'finalizado',8),
@@ -165,19 +165,18 @@ INSERT INTO calificaciones
 VALUES
 (5,'Excelente servicio',1,@p1),
 (4,'Buen viaje, puntual',2,@p2),
-(5,'Muy cómodo y limpio',3,@p3),
+(5,'Muy cÃ³modo y limpio',3,@p3),
 (3,'Demora en la salida',4,@p4),
 (4,'Correcto, sin inconvenientes',5,@p5),
-(5,'Excelente atención',6,@p2),
+(5,'Excelente atenciÃ³n',6,@p2),
 (4,'Todo bien',7,@p3),
 (5,'Muy amable el chofer',8,@p4),
-(3,'Un poco de tráfico, todo ok',9,@p5),
-(5,'Rápido y seguro',10,@p1);
+(3,'Un poco de trÃ¡fico, todo ok',9,@p5),
+(5,'RÃ¡pido y seguro',10,@p1);
 
 COMMIT;
 END TRY
 BEGIN CATCH
   IF @@TRANCOUNT>0 ROLLBACK;
-  THROW;
 END CATCH;
 GO

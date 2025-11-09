@@ -1,4 +1,12 @@
-CREATE DATABASE sistema_transporte;
+IF NOT EXISTS (
+    SELECT name 
+    FROM sys.databases 
+    WHERE name = N'sistema_transporte'
+)
+BEGIN
+    CREATE DATABASE sistema_transporte;
+END
+
 USE sistema_transporte;
 
 CREATE TABLE usuarios (
