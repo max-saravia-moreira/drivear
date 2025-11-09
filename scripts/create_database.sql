@@ -24,8 +24,8 @@ CREATE TABLE usuarios (
   tipo_usuario VARCHAR(50) CHECK (tipo_usuario IN ('chofer', 'pasajero')),
   estado VARCHAR(50) CHECK (estado IN ('activo', 'inactivo', 'suspendido')),
   contrasena VARCHAR(255) NOT NULL,
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_usuario_email UNIQUE (email),
   CONSTRAINT uq_usuario_cuit UNIQUE (cuit_cuil)
@@ -36,11 +36,11 @@ CREATE TABLE licencias (
   licencia_id INT IDENTITY(1,1) PRIMARY KEY,
   numero_licencia INT NOT NULL,
   categoria VARCHAR(50) NOT NULL,
-  fecha_emision DATE NOT NULL,
-  fecha_vencimiento DATE NOT NULL,
+  fecha_emision DATETIMEOFFSET NOT NULL,
+  fecha_vencimiento DATETIMEOFFSET NOT NULL,
   usuario_id INT NOT NULL,
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_licencia_numero UNIQUE (numero_licencia),
   CONSTRAINT fk_licencia_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id),
@@ -55,8 +55,8 @@ CREATE TABLE vehiculos (
   patente VARCHAR(20) NOT NULL,
   anio INT NOT NULL,
   usuario_id INT NOT NULL,
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_vehiculo_patente UNIQUE (patente),
   CONSTRAINT fk_vehiculo_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id)
@@ -67,11 +67,11 @@ CREATE TABLE seguros (
   compania VARCHAR(100) NOT NULL,
   tipo_seguro VARCHAR(100) NOT NULL,
   numero_poliza INT NOT NULL,
-  fecha_vencimiento DATE NOT NULL,
+  fecha_vencimiento DATETIMEOFFSET NOT NULL,
   cobertura_detalle VARCHAR(255),
   vehiculo_id INT NOT NULL,
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_seguro_poliza UNIQUE (numero_poliza),
   CONSTRAINT fk_seguro_vehiculo FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(vehiculo_id),
@@ -86,11 +86,11 @@ CREATE TABLE tarjetas (
   entidad_bancaria VARCHAR(100),
   red_pago VARCHAR(50),
   cvv INT CHECK (cvv BETWEEN 100 AND 9999),
-  vencimiento DATE NOT NULL,
+  vencimiento DATETIMEOFFSET NOT NULL,
   usuario_id INT NOT NULL,
 
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_tarjeta_numero UNIQUE (numero_tarjeta),
   CONSTRAINT fk_tarjeta_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(usuario_id),
@@ -99,18 +99,17 @@ CREATE TABLE tarjetas (
 
 CREATE TABLE viajes (
   viaje_id INT IDENTITY(1,1) PRIMARY KEY,
-  fecha DATE NOT NULL,
+  fecha_inicial DATETIMEOFFSET NOT NULL,
+  fecha_final DATETIMEOFFSET,
   origen VARCHAR(150) NOT NULL,
   destino VARCHAR(150) NOT NULL,
-  hora_inicial TIME NOT NULL,
-  hora_final TIME,
   distancia_km FLOAT CHECK (distancia_km >= 0),
   costo FLOAT CHECK (costo >= 0),
   estado VARCHAR(50) CHECK (estado IN ('pendiente', 'en curso', 'finalizado', 'cancelado')),
   vehiculo_id INT NOT NULL,
 
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT fk_viaje_vehiculo FOREIGN KEY (vehiculo_id) REFERENCES vehiculos(vehiculo_id)
 );
@@ -120,11 +119,11 @@ CREATE TABLE calificaciones (
   calificacion_id INT IDENTITY(1,1) PRIMARY KEY,
   puntuacion INT CHECK (puntuacion BETWEEN 1 AND 5),
   comentario VARCHAR(255),
-  fecha DATE DEFAULT (GETDATE()),
+  fecha DATETIMEOFFSET DEFAULT (GETDATE()),
   viaje_id INT NOT NULL,
 
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT fk_calificacion_viaje FOREIGN KEY (viaje_id) REFERENCES viajes(viaje_id)
 );
@@ -136,8 +135,8 @@ CREATE TABLE usuarios_viajes_tarjetas (
   viaje_id INT NOT NULL,
   tarjeta_id INT NOT NULL,
 
-  creado_fecha DATETIME DEFAULT GETDATE(),
-  actualizado_fecha DATETIME DEFAULT GETDATE(),
+  creado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
+  actualizado_fecha DATETIMEOFFSET DEFAULT GETDATE(),
 
   CONSTRAINT uq_uvt UNIQUE (usuario_chofer_id, usuario_pasajero_id, viaje_id, tarjeta_id),
   CONSTRAINT fk_uvt_chofer FOREIGN KEY (usuario_chofer_id) REFERENCES usuarios(usuario_id),
