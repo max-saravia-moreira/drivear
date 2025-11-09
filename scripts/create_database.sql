@@ -1,14 +1,16 @@
 IF NOT EXISTS (
     SELECT name 
     FROM sys.databases 
-    WHERE name = N'sistema_transporte'
+    WHERE name = 'sistema_transporte'
 )
 BEGIN
     CREATE DATABASE sistema_transporte;
+	ALTER DATABASE sistema_transporte COLLATE LATIN1_GENERAL_100_CI_AS_SC_UTF8;
 END
+GO
 
 USE sistema_transporte;
-
+GO
 CREATE TABLE usuarios (
   usuario_id INT IDENTITY(1,1) PRIMARY KEY,
   cuit_cuil BIGINT NOT NULL,
