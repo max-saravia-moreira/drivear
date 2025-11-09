@@ -99,11 +99,10 @@ CREATE TABLE tarjetas (
 
 CREATE TABLE viajes (
   viaje_id INT IDENTITY(1,1) PRIMARY KEY,
-  fecha DATE NOT NULL,
+  fecha_inicial DATETIMEOFFSET NOT NULL,
+  fecha_final DATETIMEOFFSET NOT NULL,
   origen VARCHAR(150) NOT NULL,
   destino VARCHAR(150) NOT NULL,
-  hora_inicial TIME NOT NULL,
-  hora_final TIME,
   distancia_km FLOAT CHECK (distancia_km >= 0),
   costo FLOAT CHECK (costo >= 0),
   estado VARCHAR(50) CHECK (estado IN ('pendiente', 'en curso', 'finalizado', 'cancelado')),
