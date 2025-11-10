@@ -1,4 +1,4 @@
-USE sistema_transporte;   -- Selecciona la base donde est�n tus objetos
+USE sistema_transporte;   -- Selecciona la base donde estan tus objetos
 GO
 
 
@@ -170,7 +170,7 @@ BEGIN
     /* 2) Validar que el chofer está activo */
     IF dbo.fn_ChoferActivo(@chofer) = 0
     BEGIN
-        RAISERROR('El chofer no est� activo o no existe.', 16, 1);
+        RAISERROR('El chofer no esta activo o no existe.', 16, 1);
         RETURN;
     END;
 
