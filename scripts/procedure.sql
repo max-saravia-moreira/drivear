@@ -1,10 +1,10 @@
-USE sistema_transporte;   -- Selecciona la base donde est·n tus objetos
+USE sistema_transporte;   -- Selecciona la base donde estÔøΩn tus objetos
 GO
 
 
 /* =========================================================
    1) fn_ChoferActivo(@usuario_id INT)
-      Devuelve 1 si el usuario existe, es 'chofer' y est· 'activo'.
+      Devuelve 1 si el usuario existe, es 'chofer' y est√° 'activo'.
    ========================================================= */
 CREATE OR ALTER FUNCTION dbo.fn_ChoferActivo(@usuario_id INT)
 RETURNS BIT
@@ -26,7 +26,7 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA: devuelve 1 si el chofer 4 est· activo
+-- PRUEBA R√ÅPIDA: devuelve 1 si el chofer 4 est√° activo
 SELECT dbo.fn_ChoferActivo(4) AS es_activo;
 GO
 
@@ -54,7 +54,7 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA: 1 = vencida, 0 = vigente
+-- PRUEBA R√ÅPIDA: 1 = vencida, 0 = vigente
 SELECT dbo.fn_TarjetaVencida(3) AS tarjeta_vencida;
 GO
 
@@ -71,7 +71,7 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA: costo estimado para 12.5 km
+-- PRUEBA R√ÅPIDA: costo estimado para 12.5 km
 SELECT dbo.fn_CostoEstimado(12.5) AS costo_estimado;
 GO
 
@@ -99,14 +99,14 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA: 1 = tiene licencia al dÌa
+-- PRUEBA R√ÅPIDA: 1 = tiene licencia al d√≠a
 SELECT dbo.fn_TieneLicenciaVigente(4) AS licencia_vigente;
 GO
 
 
 /* =========================================================
    5) fn_EsViajeFinalizable(@viaje_id INT)
-      Devuelve 1 si el viaje est· en estado 'en curso'.
+      Devuelve 1 si el viaje est√° en estado 'en curso'.
    ========================================================= */
 CREATE OR ALTER FUNCTION dbo.fn_EsViajeFinalizable(@viaje_id INT)
 RETURNS BIT
@@ -114,7 +114,7 @@ AS
 BEGIN
     DECLARE @ok BIT = 0;
 
-    -- SÛlo se puede finalizar si est· "en curso"
+    -- S√≥lo se puede finalizar si est√° "en curso"
     IF EXISTS (
         SELECT 1
         FROM viajes
@@ -127,7 +127,7 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA: 1 = se puede finalizar
+-- PRUEBA R√ÅPIDA: 1 = se puede finalizar
 SELECT dbo.fn_EsViajeFinalizable(1) AS finalizable;
 GO
 
@@ -135,20 +135,19 @@ GO
 /* =========================================================
    6) sp_RegistrarViaje
       Inserta un viaje 'pendiente' validando chofer activo
-      y licencia vigente. El chofer se infiere del vehÌculo.
+      y licencia vigente. El chofer est√° relacionado al veh√≠culo.
    ========================================================= */
 CREATE OR ALTER PROCEDURE dbo.sp_RegistrarViaje
-    @fecha_inicial DATETIMEOFFSET,   -- Fecha/hora de inicio del viaje
-    @origen        VARCHAR(150),     -- Origen
-    @destino       VARCHAR(150),     -- Destino
-    @vehiculo_id   INT,              -- VehÌculo a usar (dueÒo = chofer)
-    @distancia_km  FLOAT    = NULL,  -- Distancia estimada (opcional)
-    @costo         FLOAT    = NULL   -- Costo (si NULL y hay distancia, se calcula)
+    @fecha_inicial DATETIMEOFFSET,
+    @origen        VARCHAR(150),
+    @destino       VARCHAR(150),
+    @vehiculo_id   INT,
+    @distancia_km  FLOAT    = NULL,
+    @costo         FLOAT    = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    /* 1) Obtener chofer dueÒo del vehÌculo */
     DECLARE @chofer INT =
     (
         SELECT v.usuario_id
@@ -158,14 +157,14 @@ BEGIN
 
     IF @chofer IS NULL
     BEGIN
-        RAISERROR('El vehÌculo no existe.', 16, 1);
+        RAISERROR('El veh√≠culo no existe.', 16, 1);
         RETURN;
     END;
 
-    /* 2) Validar que el chofer estÈ activo */
+    /* 2) Validar que el chofer est√° activo */
     IF dbo.fn_ChoferActivo(@chofer) = 0
     BEGIN
-        RAISERROR('El chofer no est· activo o no existe.', 16, 1);
+        RAISERROR('El chofer no estÔøΩ activo o no existe.', 16, 1);
         RETURN;
     END;
 
@@ -180,7 +179,7 @@ BEGIN
     IF @costo IS NULL AND @distancia_km IS NOT NULL
         SET @costo = dbo.fn_CostoEstimado(@distancia_km);
 
-    /* 5) Insertar viaje con las columnas reales de tu tabla */
+    /* 5) Insertar viaje */
     INSERT INTO dbo.viajes
         (fecha_inicial, fecha_final, origen, destino,
          distancia_km, costo, estado, vehiculo_id)
@@ -190,16 +189,16 @@ BEGIN
 END;
 GO
 
--- PRUEBA R¡PIDA (ajust· @vehiculo_id a uno que exista y sea de un chofer activo con licencia vigente):
+-- PRUEBA R√ÅPIDA (ajustar @vehiculo_id a uno que exista y sea de un chofer activo con licencia vigente):
 EXEC dbo.sp_RegistrarViaje
      @fecha_inicial = '2025-11-01T15:00:00-03:00',
      @origen        = 'CABA',
      @destino       = 'La Plata',
      @vehiculo_id   = 11,
      @distancia_km  = 30,
-     @costo         = NULL;   -- se calcula con fn_CostoEstimado si hay distancia
+     @costo         = NULL;
 
--- Ver lo ˙ltimo insertado
+-- Ver lo √∫ltimo insertado
 SELECT TOP (5) * 
 FROM dbo.viajes 
 ORDER BY viaje_id DESC;
@@ -208,11 +207,11 @@ GO
 
 /* =========================================================
    7) Estado_de_Viajes
-      Lista viajes de un chofer filtrando por estado (p.ej. 'pendiente').
+      Lista viajes de un chofer filtrando por estado (ej: 'pendiente').
    ========================================================= */
 CREATE OR ALTER PROCEDURE dbo.Estado_de_Viajes 
-    @id_chofer INT = 0,                 -- usuarios.usuario_id (chofer)
-    @estado    VARCHAR(30) = 'pendiente'-- estado deseado
+    @id_chofer INT = 0,
+    @estado    VARCHAR(30) = 'pendiente'
 AS
 BEGIN 
     SET NOCOUNT ON;
@@ -222,14 +221,14 @@ BEGIN
         v.origen, 
         v.destino, 
         v.estado
-    FROM usuarios_viajes_tarjetas AS uvt     -- tabla que vincula chofer/pasajero/viaje/tarjeta
+    FROM usuarios_viajes_tarjetas AS uvt
     JOIN viajes AS v 
       ON uvt.viaje_id = v.viaje_id
     WHERE uvt.usuario_chofer_id = @id_chofer 
-      AND v.estado = @estado;                -- filtro de estado
+      AND v.estado = @estado;
 END;
 GO
 
--- PRUEBA R¡PIDA: viajes 'pendiente' del chofer 9
+-- PRUEBA: viajes 'pendiente' del chofer 9
 EXEC dbo.Estado_de_Viajes @id_chofer = 9, @estado = 'pendiente';
 GO
