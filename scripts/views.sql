@@ -1,14 +1,7 @@
 USE sistema_transporte;
 GO
 
-/* =========================================================
-   1) Vista principal de negocio: viajes con todo el detalle
-   - Une viaje + chofer + pasajero + vehículo + tarjeta
-   - Enmascara número de tarjeta (últimos 4)
-   - Marca si la tarjeta está vencida y si el seguro está vigente
-   - Calcula duración (minutos) cuando hay fecha_final
-   NOTA: tu tabla VIAJES usa DATETIMEOFFSET (fecha_inicial/fecha_final)
-   ========================================================= */
+/*  Viajes con todo el detalle */
 CREATE VIEW dbo.vw_ViajesDetalle
 AS
 SELECT
@@ -21,7 +14,7 @@ SELECT
     v.costo,
     v.estado,
 
-    -- Vehículo
+    -- VehÃ­culo
     vh.vehiculo_id,
     vh.patente,
     vh.marca,
@@ -40,12 +33,12 @@ SELECT
     RIGHT(CAST(t.numero_tarjeta AS VARCHAR(19)), 4) AS tarjeta_ultimos4,
     CASE WHEN t.vencimiento < SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS tarjeta_vencida,
 
-    -- Seguro vigente del vehículo (toma el de mayor fecha_vencimiento)
+    -- Seguro vigente del vehÃ­culo (toma el de mayor fecha_vencimiento)
     CASE WHEN s_max.fecha_vencimiento >= SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS seguro_vigente,
     s_max.compania          AS seguro_compania,
     s_max.fecha_vencimiento AS seguro_vencimiento,
 
-    -- Duración en minutos (si hay fecha_final)
+    -- DuraciÃ³n en minutos (si hay fecha_final)
     CASE
       WHEN v.fecha_final IS NOT NULL THEN DATEDIFF(MINUTE, v.fecha_inicial, v.fecha_final)
       ELSE NULL
@@ -70,9 +63,9 @@ OUTER APPLY (
 GO
 
 /* =========================================================
-   2) Vista de métricas por chofer
+   2) Vista de mÃ©tricas por chofer
    - Viajes totales, ingresos (suma de costo finalizados),
-     y promedio de calificación
+     y promedio de calificaciÃ³n
    ========================================================= */
 CREATE VIEW dbo.vw_MetricasChofer
 AS
@@ -94,14 +87,14 @@ GROUP BY u.usuario_id, CONCAT(u.nombre,' ',u.apellido);
 GO
 
 /* =========================================================
-   3) Ejemplos rápidos de uso
+   3) Ejemplos rÃ¡pidos de uso
    ========================================================= */
--- Detalle de viajes (los 10 más recientes)
+-- Detalle de viajes (los 10 mÃ¡s recientes)
 SELECT TOP (10) * 
 FROM dbo.vw_ViajesDetalle
 ORDER BY viaje_id DESC;
 
--- Métricas por chofer (ordenar por ingresos)
+-- MÃ©tricas por chofer (ordenar por ingresos)
 SELECT *
 FROM dbo.vw_MetricasChofer
 ORDER BY ingresos_finalizados DESC, viajes_totales DESC;
