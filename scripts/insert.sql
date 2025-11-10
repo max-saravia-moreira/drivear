@@ -26,15 +26,14 @@ DELETE FROM usuarios;
 /* --------------------------------------------------------
 1) Reseed de identidades para comenzar desde 1
 -------------------------------------------------------- */
-DBCC CHECKIDENT ('usuarios', RESEED, 0);
-DBCC CHECKIDENT ('licencias', RESEED, 0);
-DBCC CHECKIDENT ('vehiculos', RESEED, 0);
-DBCC CHECKIDENT ('seguros', RESEED, 0);
-DBCC CHECKIDENT ('tarjetas', RESEED, 0);
-DBCC CHECKIDENT ('viajes', RESEED, 0);
 DBCC CHECKIDENT ('calificaciones', RESEED, 0);
 DBCC CHECKIDENT ('usuarios_viajes_tarjetas', RESEED, 0);
-
+DBCC CHECKIDENT ('viajes', RESEED, 0);
+DBCC CHECKIDENT ('seguros', RESEED, 0);
+DBCC CHECKIDENT ('vehiculos', RESEED, 0);
+DBCC CHECKIDENT ('licencias', RESEED, 0);
+DBCC CHECKIDENT ('tarjetas', RESEED, 0);
+DBCC CHECKIDENT ('usuarios', RESEED, 0);
 /* --------------------------------------------------------
 2) Usuarios:
 -------------------------------------------------------- */
