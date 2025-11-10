@@ -1,7 +1,10 @@
 
 -- Trigger Validar que no se tome un viaje con tarjeta vencida
 /* Bloquea asociar una tarjeta vencida en NUEVAS filas de uvt */
-CREATE OR ALTER TRIGGER dbo.trg_BloquearTarjetaVencida
+USE sistema_transporte;
+GO
+
+CREATE OR ALTER TRIGGER trg_BloquearTarjetaVencida
 ON dbo.usuarios_viajes_tarjetas
 AFTER INSERT
 AS
@@ -19,8 +22,8 @@ BEGIN
     BEGIN
         RAISERROR(N'No se puede utilizar una tarjeta vencida.', 16, 1);
         ROLLBACK TRANSACTION;
-        RETURN;
-    END;
+        RETURN
+    END
 END;
 
 SELECT
@@ -33,26 +36,6 @@ SELECT
 FROM usuarios_viajes_tarjetas AS uvt
 LEFT JOIN tarjetas AS t
     ON uvt.tarjeta_id = t.tarjeta_id;
-
---ALTER TABLE dbo.tarjetas NOCHECK CONSTRAINT chk_tarjeta_vencimiento;
---ALTER TABLE dbo.tarjetas WITH CHECK CHECK CONSTRAINT chk_tarjeta_vencimiento;
-
-UPDATE dbo.tarjetas
-SET vencimiento = '2010-01-01T00:00:00+00:00'  -- fecha antigua para asegurar vencimiento
-WHERE tarjeta_id = 5;
-
-
--- Intento de inserci�n que debe fallar y producir rollback
-INSERT INTO dbo.usuarios_viajes_tarjetas
-    (usuario_chofer_id, usuario_pasajero_id, viaje_id, tarjeta_id)
-VALUES
-    (10, 5, 11, 5);  -- tarjeta_id = 5 fue marcada vencida arriba
-
-
-
-
-USE sistema_transporte;
-GO
 
 /* ============================================================
 TRIGGER: trg_Viajes_Estado
@@ -71,7 +54,7 @@ No se puede pasar:
         - finalizado -> en curso / pendiente
         - en curso -> pendiente (SI se permite)
 ============================================================ */
-CREATE OR ALTER TRIGGER dbo.trg_Viajes_Estado
+CREATE OR ALTER TRIGGER trg_Viajes_Estado
 ON dbo.viajes
 INSTEAD OF UPDATE
 AS

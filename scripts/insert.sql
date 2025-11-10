@@ -9,8 +9,6 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 GO
 
-BEGIN TRY
-BEGIN TRAN;
 
 /* --------------------------------------------------------
 0) Limpieza: borrar en orden de dependencias (FK)
@@ -38,8 +36,7 @@ DBCC CHECKIDENT ('calificaciones', RESEED, 0);
 DBCC CHECKIDENT ('usuarios_viajes_tarjetas', RESEED, 0);
 
 /* --------------------------------------------------------
-2) Usuarios: 5 pasajeros y 5 choferes
-(los IDs se consultaron por email mas adelante)
+2) Usuarios:
 -------------------------------------------------------- */
 	
 INSERT INTO usuarios (cuit_cuil,nombre,apellido,email,telefono,calle,altura,codigo_postal,
@@ -177,11 +174,3 @@ VALUES
 (5, 'Muy amable el chofer', 8),
 (3, 'Un poco de tráfico, todo ok', 9),
 (5, 'Rápido y seguro', 10);
-
-COMMIT;
-END TRY
-BEGIN CATCH
-IF @@TRANCOUNT > 0 ROLLBACK;
-THROW;
-END CATCH;
-GO
