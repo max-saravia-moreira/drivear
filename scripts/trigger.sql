@@ -11,13 +11,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Si alguna de las filas reci�n insertadas usa tarjeta vencida => error
+    -- Si alguna de las filas recién insertadas usa tarjeta vencida => error
     IF EXISTS (
         SELECT 1
         FROM inserted AS i
         INNER JOIN dbo.tarjetas AS t
             ON t.tarjeta_id = i.tarjeta_id
-        WHERE t.vencimiento < SYSDATETIMEOFFSET()   -- tus columnas son DATETIMEOFFSET
+        WHERE t.vencimiento < '2026-10-06'   -- cambiar fecha para testear.
     )
     BEGIN
         RAISERROR(N'No se puede utilizar una tarjeta vencida.', 16, 1);
@@ -45,10 +45,10 @@ OBJETIVO:
 Controlar y validar las transiciones del estado de un viaje.
 
 REGLAS DE NEGOCIO:
-pendiente  -> en curso        (v�lido)
+pendiente  -> en curso        (válido)
 en curso   -> pendiente       (rollback permitido)
-en curso   -> finalizado      (v�lido)
-Un viaje FINALIZADO no puede cambiar a ning�n otro estado
+en curso   -> finalizado      (válido)
+Un viaje FINALIZADO no puede cambiar a ningún otro estado
 No se puede pasar:
         - pendiente -> finalizado
         - finalizado -> en curso / pendiente
@@ -80,7 +80,7 @@ BEGIN
 
     /* =======================================================
        REGLA 1:
-       S�lo pod�s finalizar si ven�s de "en curso"
+       Solo podés finalizar si venís de "en curso"
        (No permitir pendiente -> finalizado)
        ======================================================= */
     IF EXISTS (
@@ -127,7 +127,7 @@ BEGIN
           AND d.estado <> 'en curso'
     )
     BEGIN
-        RAISERROR('S�lo se puede volver a "pendiente" desde "en curso".', 16, 1);
+        RAISERROR('Solo se puede volver a "pendiente" desde "en curso".', 16, 1);
         ROLLBACK TRANSACTION;
         RETURN;
     END;
