@@ -8,7 +8,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Si alguna de las filas recién insertadas usa tarjeta vencida => error
+    -- Si alguna de las filas reciï¿½n insertadas usa tarjeta vencida => error
     IF EXISTS (
         SELECT 1
         FROM inserted AS i
@@ -42,7 +42,7 @@ SET vencimiento = '2010-01-01T00:00:00+00:00'  -- fecha antigua para asegurar ve
 WHERE tarjeta_id = 5;
 
 
--- Intento de inserción que debe fallar y producir rollback
+-- Intento de inserciï¿½n que debe fallar y producir rollback
 INSERT INTO dbo.usuarios_viajes_tarjetas
     (usuario_chofer_id, usuario_pasajero_id, viaje_id, tarjeta_id)
 VALUES
@@ -62,10 +62,10 @@ OBJETIVO:
 Controlar y validar las transiciones del estado de un viaje.
 
 REGLAS DE NEGOCIO:
-pendiente  -> en curso        (válido)
+pendiente  -> en curso        (vï¿½lido)
 en curso   -> pendiente       (rollback permitido)
-en curso   -> finalizado      (válido)
-Un viaje FINALIZADO no puede cambiar a ningún otro estado
+en curso   -> finalizado      (vï¿½lido)
+Un viaje FINALIZADO no puede cambiar a ningï¿½n otro estado
 No se puede pasar:
         - pendiente -> finalizado
         - finalizado -> en curso / pendiente
@@ -97,7 +97,7 @@ BEGIN
 
     /* =======================================================
        REGLA 1:
-       Sólo podés finalizar si venís de "en curso"
+       Sï¿½lo podï¿½s finalizar si venï¿½s de "en curso"
        (No permitir pendiente -> finalizado)
        ======================================================= */
     IF EXISTS (
@@ -144,7 +144,7 @@ BEGIN
           AND d.estado <> 'en curso'
     )
     BEGIN
-        RAISERROR('Sólo se puede volver a "pendiente" desde "en curso".', 16, 1);
+        RAISERROR('Sï¿½lo se puede volver a "pendiente" desde "en curso".', 16, 1);
         ROLLBACK TRANSACTION;
         RETURN;
     END;

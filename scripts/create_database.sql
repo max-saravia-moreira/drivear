@@ -144,3 +144,14 @@ CREATE TABLE usuarios_viajes_tarjetas (
   CONSTRAINT fk_uvt_viaje FOREIGN KEY (viaje_id) REFERENCES viajes(viaje_id),
   CONSTRAINT fk_uvt_tarjeta FOREIGN KEY (tarjeta_id) REFERENCES tarjetas(tarjeta_id)
 );
+
+
+/* ÍNDICES */
+
+CREATE INDEX idx_tarjetas_id ON seguros(numero_poliza);
+
+CREATE INDEX idx_tarjetas_id ON tarjetas(numero_tarjeta);
+
+CREATE INDEX idx_vehiculos_usuario_id ON vehiculos(patente);
+
+CREATE INDEX idx_licencias_usuario_id ON licencias(numero_licencia);
