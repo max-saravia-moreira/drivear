@@ -1,34 +1,55 @@
 
 -- Trigger Validar que no se tome un viaje con tarjeta vencida
-CREATE TRIGGER trg_ValidarTarjetaVencida
-ON viajes
-INSTEAD OF INSERT
+/* Bloquea asociar una tarjeta vencida en NUEVAS filas de uvt */
+CREATE OR ALTER TRIGGER dbo.trg_BloquearTarjetaVencida
+ON dbo.usuarios_viajes_tarjetas
+AFTER INSERT
 AS
-
 BEGIN
     SET NOCOUNT ON;
 
+    -- Si alguna de las filas recién insertadas usa tarjeta vencida => error
     IF EXISTS (
-		SELECT vencimiento FROM viajes v
-		LEFT JOIN usuarios_viajes_tarjetas uvt
-		ON v.viaje_id = uvt.viaje_id
-		LEFT JOIN tarjetas ttcc
-		ON uvt.tarjeta_id = ttcc.tarjeta_id
-		WHERE vencimiento <= GETDATE()
-	)
+        SELECT 1
+        FROM inserted AS i
+        INNER JOIN dbo.tarjetas AS t
+            ON t.tarjeta_id = i.tarjeta_id
+        WHERE t.vencimiento < SYSDATETIMEOFFSET()   -- tus columnas son DATETIMEOFFSET
+    )
     BEGIN
-        RAISERROR('No se puede utilizar una tarjeta vencida.', 16, 1);
+        RAISERROR(N'No se puede utilizar una tarjeta vencida.', 16, 1);
+        ROLLBACK TRANSACTION;
         RETURN;
-    END
-
-    SELECT * FROM inserted;
+    END;
 END;
 
+SELECT
+    uvt.uvt_id,
+    uvt.usuario_chofer_id,
+    uvt.usuario_pasajero_id,
+    uvt.tarjeta_id,
+	t.numero_tarjeta,
+    t.vencimiento
+FROM usuarios_viajes_tarjetas AS uvt
+LEFT JOIN tarjetas AS t
+    ON uvt.tarjeta_id = t.tarjeta_id;
 
-insert into viajes values
-('2025-10-31',	'CABA',	'Tigre',	'17:30:00.0000000',NULL,30,3000,'pendiente',10,NULL,GETDATE(),NULL,GETDATE());
-exec sp_columns select * from viajes;
-GO
+--ALTER TABLE dbo.tarjetas NOCHECK CONSTRAINT chk_tarjeta_vencimiento;
+--ALTER TABLE dbo.tarjetas WITH CHECK CHECK CONSTRAINT chk_tarjeta_vencimiento;
+
+UPDATE dbo.tarjetas
+SET vencimiento = '2010-01-01T00:00:00+00:00'  -- fecha antigua para asegurar vencimiento
+WHERE tarjeta_id = 5;
+
+
+-- Intento de inserción que debe fallar y producir rollback
+INSERT INTO dbo.usuarios_viajes_tarjetas
+    (usuario_chofer_id, usuario_pasajero_id, viaje_id, tarjeta_id)
+VALUES
+    (10, 5, 11, 5);  -- tarjeta_id = 5 fue marcada vencida arriba
+
+
+
 
 USE sistema_transporte;
 GO
@@ -129,7 +150,7 @@ BEGIN
     END;
 
     /* =======================================================
-       UPDATE REAL: sin recursión
+       UPDATE REAL:
        - Completa fecha_final cuando se finaliza
        - Resetea fecha_final cuando se vuelve a pendiente/en curso
        - Actualiza actualizado_fecha siempre
@@ -161,8 +182,8 @@ GO
 --GO
 
 /* ===========================
-   PRUEBAS PARA EL TRIGGER
-   =========================== */
+PRUEBAS PARA EL TRIGGER
+=========================== */
 
 select * from viajes;
 
