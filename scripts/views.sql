@@ -28,17 +28,17 @@ SELECT
     pas.usuario_id         AS pasajero_id,
     CONCAT(pas.nombre, ' ', pas.apellido) AS pasajero_nombre,
 
-    -- Tarjeta (enmascarado)
+    -- Tarjeta 
     t.tarjeta_id,
     RIGHT(CAST(t.numero_tarjeta AS VARCHAR(19)), 4) AS tarjeta_ultimos4,
     CASE WHEN t.vencimiento < SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS tarjeta_vencida,
 
-    -- Seguro vigente del vehículo (toma el de mayor fecha_vencimiento)
+    -- Seguro vigente del vehículo 
     CASE WHEN s_max.fecha_vencimiento >= SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS seguro_vigente,
     s_max.compania          AS seguro_compania,
     s_max.fecha_vencimiento AS seguro_vencimiento,
 
-    -- Duración en minutos (si hay fecha_final)
+    -- Duración en minutos 
     CASE
       WHEN v.fecha_final IS NOT NULL THEN DATEDIFF(MINUTE, v.fecha_inicial, v.fecha_final)
       ELSE NULL
@@ -62,11 +62,7 @@ OUTER APPLY (
 ) AS s_max;
 GO
 
-/* =========================================================
-   2) Vista de métricas por chofer
-   - Viajes totales, ingresos (suma de costo finalizados),
-     y promedio de calificación
-   ========================================================= */
+/* Metricas chofer */
 CREATE VIEW dbo.vw_MetricasChofer
 AS
 SELECT
@@ -86,15 +82,13 @@ WHERE u.tipo_usuario = 'chofer'
 GROUP BY u.usuario_id, CONCAT(u.nombre,' ',u.apellido);
 GO
 
-/* =========================================================
-   3) Ejemplos rápidos de uso
-   ========================================================= */
--- Detalle de viajes (los 10 más recientes)
+/* Ejemplo de uso */
+-- Detalle de viajes 
 SELECT TOP (10) * 
 FROM dbo.vw_ViajesDetalle
 ORDER BY viaje_id DESC;
 
--- Métricas por chofer (ordenar por ingresos)
+-- Métricas por chofer 
 SELECT *
 FROM dbo.vw_MetricasChofer
 ORDER BY ingresos_finalizados DESC, viajes_totales DESC;
