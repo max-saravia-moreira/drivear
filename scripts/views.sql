@@ -1,207 +1,108 @@
 USE sistema_transporte;
 GO
 
-/* ====== USUARIOS ====== */
-IF OBJECT_ID('dbo.v_usuarios','V') IS NOT NULL DROP VIEW dbo.v_usuarios;
-GO
-CREATE VIEW dbo.v_usuarios AS
+/* =========================================================
+   1) Vista principal de negocio: viajes con todo el detalle
+   - Une viaje + chofer + pasajero + vehículo + tarjeta
+   - Enmascara número de tarjeta (últimos 4)
+   - Marca si la tarjeta está vencida y si el seguro está vigente
+   - Calcula duración (minutos) cuando hay fecha_final
+   NOTA: tu tabla VIAJES usa DATETIMEOFFSET (fecha_inicial/fecha_final)
+   ========================================================= */
+CREATE VIEW dbo.vw_ViajesDetalle
+AS
 SELECT
-  usuario_id,
-  cuit_cuil,
-  nombre,
-  apellido,
-  email,
-  telefono,
-  calle,
-  altura,
-  codigo_postal,
-  tipo_usuario,
-  estado,
-  /* ocultamos la contraseña */
-  CAST(NULL AS VARCHAR(1)) AS contrasena,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.usuarios;
+    v.viaje_id,
+    v.fecha_inicial,
+    v.fecha_final,
+    v.origen,
+    v.destino,
+    v.distancia_km,
+    v.costo,
+    v.estado,
+
+    -- Vehículo
+    vh.vehiculo_id,
+    vh.patente,
+    vh.marca,
+    vh.modelo,
+
+    -- Chofer
+    chofer.usuario_id      AS chofer_id,
+    CONCAT(chofer.nombre, ' ', chofer.apellido) AS chofer_nombre,
+
+    -- Pasajero
+    pas.usuario_id         AS pasajero_id,
+    CONCAT(pas.nombre, ' ', pas.apellido) AS pasajero_nombre,
+
+    -- Tarjeta (enmascarado)
+    t.tarjeta_id,
+    RIGHT(CAST(t.numero_tarjeta AS VARCHAR(19)), 4) AS tarjeta_ultimos4,
+    CASE WHEN t.vencimiento < SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS tarjeta_vencida,
+
+    -- Seguro vigente del vehículo (toma el de mayor fecha_vencimiento)
+    CASE WHEN s_max.fecha_vencimiento >= SYSDATETIMEOFFSET() THEN 1 ELSE 0 END AS seguro_vigente,
+    s_max.compania          AS seguro_compania,
+    s_max.fecha_vencimiento AS seguro_vencimiento,
+
+    -- Duración en minutos (si hay fecha_final)
+    CASE
+      WHEN v.fecha_final IS NOT NULL THEN DATEDIFF(MINUTE, v.fecha_inicial, v.fecha_final)
+      ELSE NULL
+    END AS minutos
+FROM dbo.viajes v
+INNER JOIN dbo.usuarios_viajes_tarjetas uvt
+        ON uvt.viaje_id   = v.viaje_id
+INNER JOIN dbo.usuarios chofer
+        ON chofer.usuario_id = uvt.usuario_chofer_id
+INNER JOIN dbo.usuarios pas
+        ON pas.usuario_id    = uvt.usuario_pasajero_id
+INNER JOIN dbo.vehiculos vh
+        ON vh.vehiculo_id    = v.vehiculo_id
+LEFT  JOIN dbo.tarjetas t
+        ON t.tarjeta_id      = uvt.tarjeta_id
+OUTER APPLY (
+    SELECT TOP (1) s.compania, s.fecha_vencimiento
+    FROM dbo.seguros s
+    WHERE s.vehiculo_id = vh.vehiculo_id
+    ORDER BY s.fecha_vencimiento DESC
+) AS s_max;
 GO
 
-/* ====== LICENCIAS ====== */
-IF OBJECT_ID('dbo.v_licencias','V') IS NOT NULL DROP VIEW dbo.v_licencias;
-GO
-CREATE VIEW dbo.v_licencias AS
+/* =========================================================
+   2) Vista de métricas por chofer
+   - Viajes totales, ingresos (suma de costo finalizados),
+     y promedio de calificación
+   ========================================================= */
+CREATE VIEW dbo.vw_MetricasChofer
+AS
 SELECT
-  licencia_id,
-  numero_licencia,
-  categoria,
-  fecha_emision,
-  fecha_vencimiento,
-  usuario_id,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.licencias;
+    u.usuario_id                         AS chofer_id,
+    CONCAT(u.nombre,' ',u.apellido)      AS chofer_nombre,
+    COUNT(DISTINCT v.viaje_id)           AS viajes_totales,
+    SUM(CASE WHEN v.estado = 'finalizado' THEN v.costo ELSE 0 END) AS ingresos_finalizados,
+    AVG(CAST(c.puntuacion AS FLOAT))     AS promedio_puntuacion
+FROM dbo.usuarios u
+LEFT JOIN dbo.vehiculos vh
+       ON vh.usuario_id = u.usuario_id
+LEFT JOIN dbo.viajes v
+       ON v.vehiculo_id = vh.vehiculo_id
+LEFT JOIN dbo.calificaciones c
+       ON c.viaje_id = v.viaje_id
+WHERE u.tipo_usuario = 'chofer'
+GROUP BY u.usuario_id, CONCAT(u.nombre,' ',u.apellido);
 GO
 
-/* ====== VEHICULOS ====== */
-IF OBJECT_ID('dbo.v_vehiculos','V') IS NOT NULL DROP VIEW dbo.v_vehiculos;
-GO
-CREATE VIEW dbo.v_vehiculos AS
-SELECT
-  vehiculo_id,
-  marca,
-  modelo,
-  color,
-  patente,
-  anio,
-  usuario_id,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.vehiculos;
-GO
+/* =========================================================
+   3) Ejemplos rápidos de uso
+   ========================================================= */
+-- Detalle de viajes (los 10 más recientes)
+SELECT TOP (10) * 
+FROM dbo.vw_ViajesDetalle
+ORDER BY viaje_id DESC;
 
-/* ====== SEGUROS (con flag de vigencia) ====== */
-IF OBJECT_ID('dbo.v_seguros','V') IS NOT NULL DROP VIEW dbo.v_seguros;
-GO
-CREATE VIEW dbo.v_seguros AS
-SELECT
-  seguro_id,
-  compania,
-  tipo_seguro,
-  numero_poliza,
-  fecha_vencimiento,
-  cobertura_detalle,
-  vehiculo_id,
-  CASE WHEN fecha_vencimiento >= CAST(GETDATE() AS DATE) THEN 1 ELSE 0 END AS vigente,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.seguros;
-GO
-
-/* ====== TARJETAS (enmascarado: últimos 4; CVV oculto) ====== */
-IF OBJECT_ID('dbo.v_tarjetas','V') IS NOT NULL DROP VIEW dbo.v_tarjetas;
-GO
-CREATE VIEW dbo.v_tarjetas AS
-WITH t AS (
-  SELECT
-    tarjeta_id,
-    /* convertimos a varchar para manipular */
-    CAST(numero_tarjeta AS VARCHAR(19)) AS nt_str,
-    nombre_titular,
-    tipo_tarjeta,
-    entidad_bancaria,
-    red_pago,
-    cvv,
-    vencimiento,
-    usuario_id,
-    creado_por,
-    creado_fecha,
-    actualizado_por,
-    actualizado_fecha
-  FROM dbo.tarjetas
-)
-SELECT
-  tarjeta_id,
-  -- XXXX-XXXX-XXXX-1234 (enmascarado)
-  RIGHT(nt_str, 4)                      AS ultimos_4,
-  CONCAT(REPLICATE('X', CASE WHEN LEN(nt_str) > 4 THEN LEN(nt_str) - 4 ELSE 0 END), RIGHT(nt_str,4)) AS numero_enmascarado,
-  nombre_titular,
-  tipo_tarjeta,
-  entidad_bancaria,
-  red_pago,
-  /* ocultamos CVV */
-  CAST(NULL AS INT) AS cvv,
-  vencimiento,
-  usuario_id,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM t;
-GO
-
-/* ====== VIAJES (con duración en minutos si hay hora_final) ====== */
-IF OBJECT_ID('dbo.v_viajes','V') IS NOT NULL DROP VIEW dbo.v_viajes;
-GO
-CREATE VIEW dbo.v_viajes AS
-SELECT
-  viaje_id,
-  fecha,
-  origen,
-  destino,
-  hora_inicial,
-  hora_final,
-  distancia_km,
-  costo,
-  estado,
-  vehiculo_id,
-  CASE 
-    WHEN hora_final IS NOT NULL THEN DATEDIFF(MINUTE, CAST(hora_inicial AS DATETIME), CAST(hora_final AS DATETIME))
-    ELSE NULL
-  END AS minutos,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.viajes;
-GO
-
-/* ====== CALIFICACIONES ====== */
-IF OBJECT_ID('dbo.v_calificaciones','V') IS NOT NULL DROP VIEW dbo.v_calificaciones;
-GO
-CREATE VIEW dbo.v_calificaciones AS
-SELECT
-  calificacion_id,
-  puntuacion,
-  comentario,
-  fecha,
-  viaje_id,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.calificaciones;
-GO
-
-/* ====== USUARIOS_VIAJES_TARJETAS ====== */
-IF OBJECT_ID('dbo.v_usuarios_viajes_tarjetas','V') IS NOT NULL DROP VIEW dbo.v_usuarios_viajes_tarjetas;
-GO
-CREATE VIEW dbo.v_usuarios_viajes_tarjetas AS
-SELECT
-  uvt_id,
-  usuario_chofer_id,
-  usuario_pasajero_id,
-  viaje_id,
-  tarjeta_id,
-  creado_por,
-  creado_fecha,
-  actualizado_por,
-  actualizado_fecha
-FROM dbo.usuarios_viajes_tarjetas;
-GO
-
-CREATE VIEW vw_IngresosPorMes AS
-SELECT 
-	FORMAT(fecha, 'yyyy-MM') AS mes,
-	SUM(costo) AS total_ingresos,
-	COUNT(*) AS cantidad_viajes
-FROM viajes
-WHERE estado = 'finalizado'
-GROUP BY FORMAT(fecha, 'yyyy-MM');
-
-/* ====== MOSTRAR VISTAS ====== */
-SELECT TOP (10) * FROM dbo.v_usuarios;
-SELECT TOP (10) * FROM dbo.v_licencias;
-SELECT TOP (10) * FROM dbo.v_vehiculos;
-SELECT TOP (10) * FROM dbo.v_seguros;
-SELECT TOP (10) * FROM dbo.v_tarjetas;
-SELECT TOP (10) * FROM dbo.v_viajes;
-SELECT TOP (10) * FROM dbo.v_calificaciones;
-SELECT TOP (10) * FROM dbo.v_usuarios_viajes_tarjetas;
-
+-- Métricas por chofer (ordenar por ingresos)
+SELECT *
+FROM dbo.vw_MetricasChofer
+ORDER BY ingresos_finalizados DESC, viajes_totales DESC;
 
