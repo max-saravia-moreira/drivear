@@ -149,12 +149,18 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @chofer INT =
-    (
-        SELECT v.usuario_id
-        FROM dbo.vehiculos AS v
-        WHERE v.vehiculo_id = @vehiculo_id
-    );
-
+    (	SELECT TOP (1) ch.usuario_id
+		FROM usuarios ch
+		JOIN usuarios_viajes_tarjetas uvt
+		  ON ch.usuario_id = uvt.usuario_chofer_id
+		LEFT JOIN calificaciones cal
+		  ON cal.viaje_id = uvt.viaje_id
+		WHERE ch.tipo_usuario = 'chofer'
+		  AND ch.estado = 'activo'
+		GROUP BY ch.usuario_id
+		ORDER BY AVG(cal.puntuacion) DESC
+	);
+	
     IF @chofer IS NULL
     BEGIN
         RAISERROR('El vehículo no existe.', 16, 1);
@@ -186,6 +192,7 @@ BEGIN
     VALUES
         (@fecha_inicial, NULL, @origen, @destino,
          @distancia_km, @costo, 'pendiente', @vehiculo_id);
+
 END;
 GO
 
@@ -194,9 +201,10 @@ EXEC dbo.sp_RegistrarViaje
      @fecha_inicial = '2025-11-01T15:00:00-03:00',
      @origen        = 'CABA',
      @destino       = 'La Plata',
-     @vehiculo_id   = 11,
+     @vehiculo_id   = 10,
      @distancia_km  = 30,
      @costo         = NULL;
+
 
 -- Ver lo último insertado
 SELECT TOP (5) * 
@@ -211,7 +219,7 @@ GO
    ========================================================= */
 CREATE OR ALTER PROCEDURE dbo.Estado_de_Viajes 
     @id_chofer INT = 0,
-    @estado    VARCHAR(30) = 'pendiente'
+    @estado    VARCHAR(30) = 'finalizado'
 AS
 BEGIN 
     SET NOCOUNT ON;
@@ -230,5 +238,5 @@ END;
 GO
 
 -- PRUEBA: viajes 'pendiente' del chofer 9
-EXEC dbo.Estado_de_Viajes @id_chofer = 9, @estado = 'pendiente';
+EXEC dbo.Estado_de_Viajes @id_chofer = 6, @estado = 'finalizado';
 GO
