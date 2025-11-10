@@ -146,7 +146,7 @@ CREATE TABLE usuarios_viajes_tarjetas (
 );
 
 
-/* ÍNDICES */
+/* INDICES */
 
 CREATE INDEX idx_tarjetas_id ON seguros(numero_poliza);
 
